@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+env/
+venv/
+
+# OS / misc
+.DS_Store
+Thumbs.db
+
+# Streamlit cache (if present)
+.streamlit/
+
+# Not needed in image
+*.ipynb
