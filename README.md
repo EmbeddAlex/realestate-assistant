@@ -15,10 +15,10 @@ export OLLAMA_MODEL=llama3.1   # optional
 pip install -r requirements.txt
 
 # Streamlit UI
-streamlit run app.py
+streamlit run apps/app.py
 
 # or CLI
-python cli.py
+python apps/cli.py
 ```
 
 ## Dockerfile

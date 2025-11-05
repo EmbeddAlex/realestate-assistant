@@ -1,19 +1,27 @@
-import os
+import sys, os
 import pandas as pd
 import streamlit as st
-from src.rea.engine import Filters, call_llm, filter_rank
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "properties.csv")
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
+
+from rea.engine import Filters, call_llm, filter_rank
+
+
 st.set_page_config(page_title="Real Estate Assistant (Offline)", page_icon="🏠")
-st.title("🏠 Real Estate Assistant — Offline LLM Demo")
+st.title("🏠 Real Estate Assistant - Offline LLM Demo")
 
 st.markdown("Use a **local Ollama LLM** (e.g., llama3.1). If not running, it falls back to a regex parser.")
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA_PATH = ROOT / "data" / "properties.csv"
 
 df = pd.read_csv(DATA_PATH)
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role":"assistant","content":"Hi! Tell me what you’re looking for — city, budget, bedrooms, and amenities."}
+        {"role":"assistant","content":"Hi! Tell me what you’re looking for - city, budget, bedrooms, and amenities."}
     ]
 
 for m in st.session_state.messages:
