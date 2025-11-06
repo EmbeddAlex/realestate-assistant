@@ -1,6 +1,8 @@
 # Real Estate Assistant — Offline (Ollama) Demo
 
-Runs **completely offline** using [Ollama](https://ollama.com) and a local model like `llama3.1` or `mistral`.
+AI-powered assistant that helps users find real estate properties locally using an offline LLM model.
+
+![App Screenshot](docs/app_screenshot.png)
 
 ### Setup
 
@@ -8,7 +10,7 @@ Runs **completely offline** using [Ollama](https://ollama.com) and a local model
 ```bash
 # Install Ollama: https://ollama.com/download
 
-ollama pull qwen2.5:3b-instruct-q4_K_M # or: ollama pull llama3.1
+ollama pull qwen2.5:3b-instruct-q4_K_M
 
 pip install -r requirements.txt
 
