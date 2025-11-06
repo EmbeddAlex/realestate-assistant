@@ -7,7 +7,8 @@ Runs **completely offline** using [Ollama](https://ollama.com) and a local model
 
 ```bash
 # Install Ollama: https://ollama.com/download
-ollama pull llama3.1      # or: ollama pull mistral
+
+ollama pull qwen2.5:3b-instruct-q4_K_M # or: ollama pull llama3.1
 
 pip install -r requirements.txt
 
