@@ -5,7 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import Optional, List, Dict, Any
 
 # ---- Offline LLM via Ollama ----
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b-instruct-q4_K_M")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
 USE_OLLAMA = True
@@ -75,11 +75,12 @@ def call_llm(messages: List[Dict[str, str]]) -> Dict[str, Any]:
             res = ollama_client.generate(
                 model=OLLAMA_MODEL,
                 prompt=f"{SYSTEM_PROMPT}\n\nCONVERSATION:\n{convo}\n\nReturn JSON now.",
-                options={"temperature": 0.1}
+                options={
+                    "temperature": 0.1
+                },
+                format="json"
             )
             raw = res.get("response", "").strip()
-            if raw.startswith("```"):
-                raw = "\n".join(l for l in raw.splitlines() if not l.startswith("```") and not "json" in l)
             data = json.loads(raw)
             if "filters" in data:
                 return data
@@ -98,7 +99,7 @@ def call_llm(messages: List[Dict[str, str]]) -> Dict[str, Any]:
             "near_schools": None,
             "near_transit": None
         },
-        "follow_up": "Could you provide more details about your preferences?",
+        "follow_up": "Please share your city, budget, and minimum bedrooms.",
         "finalize": False
     }
 
