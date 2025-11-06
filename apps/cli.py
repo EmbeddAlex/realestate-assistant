@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-import os
+import sys
+from pathlib import Path
 import pandas as pd
-from engine import Filters, call_llm, filter_rank
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "properties.csv")
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT / "src"))
+
+from rea.engine import Filters, call_llm, filter_rank
+
+DATA_PATH = ROOT / "data" / "properties.csv"
 
 def print_results(df):
     if df.empty:
@@ -19,6 +24,8 @@ def main():
     print("🏠 Real Estate Assistant — CLI (Offline)")
     df = pd.read_csv(DATA_PATH)
     messages = [{"role":"assistant","content":"Hello! Describe what you're looking for."}]
+    print("assistant>", messages[0]["content"])
+
     while True:
         user = input("you> ").strip()
         if user.lower() in ["quit","exit"]: break

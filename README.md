@@ -23,13 +23,8 @@ python apps/cli.py
 
 ## Dockerfile
 
-From the folder containing Dockerfile, app.py, engine.py, properties.csv, start.sh
+From the folder containing Dockerfile
 
 ```bash
 docker compose up --build
 ```
-
-## Notes
-- The app container does not embed models; Ollama service manages models in a named volume (ollama_models).
-- start.sh triggers a pull via Ollama’s API for ${OLLAMA_MODEL} on startup; safe to run repeatedly.
-- To switch models: set OLLAMA_MODEL in .env or compose env.

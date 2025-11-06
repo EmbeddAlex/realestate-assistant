@@ -10,23 +10,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy project files (adjust if your structure differs)
-# Expecting these in the build context:
-#  - app.py
-#  - engine.py
-#  - properties.csv
-#  - requirements.txt
-#  - start.sh (entrypoint)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY apps/app.py engine.py properties.csv start.sh ./
+COPY src/ /app/src/
+COPY apps/ /app/apps/
+COPY data/properties.csv /app/data/properties.csv
+COPY scripts/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-# Env: point to the Ollama container host (defined in docker-compose)
+ENV PATHONNUNBUFFERED=1
+ENV PYTHONPATH=/app/src
+
 ENV OLLAMA_HOST=http://ollama:11434
-# Default model (override via .env or compose)
 ENV OLLAMA_MODEL=llama3.1
-# Streamlit basics
+
 ENV STREAMLIT_SERVER_PORT=8501
 ENV STREAMLIT_SERVER_HEADLESS=true
 ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false

@@ -18,4 +18,4 @@ curl -fsS -X POST "${OLLAMA_HOST}/api/pull" \
   || true
 
 echo "Launching Streamlit on port ${STREAMLIT_SERVER_PORT:-8501} ..."
-exec python -m streamlit run /app/app.py --server.port=${STREAMLIT_SERVER_PORT:-8501} --server.headless=${STREAMLIT_SERVER_HEADLESS:-true}
+exec python -m streamlit run /app/apps/app.py --server.port=${STREAMLIT_SERVER_PORT:-8501} --server.headless=${STREAMLIT_SERVER_HEADLESS:-true}
