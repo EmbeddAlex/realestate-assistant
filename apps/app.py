@@ -32,6 +32,9 @@ user_input = st.chat_input("Your message")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
+    with st.chat_message("user"):
+        st.write(user_input)
+
     data = call_llm(st.session_state.messages)
     filters = data["filters"]
     follow_up = data["follow_up"]
