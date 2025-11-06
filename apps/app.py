@@ -8,7 +8,6 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from rea.engine import Filters, call_llm, filter_rank
 
-
 st.set_page_config(page_title="Real Estate Assistant (Offline)", page_icon="🏠")
 st.title("🏠 Real Estate Assistant - Offline LLM Demo")
 
@@ -21,7 +20,7 @@ df = pd.read_csv(DATA_PATH)
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role":"assistant","content":"Hi! Tell me what you’re looking for - city, budget, bedrooms, and amenities."}
+        {"role": "assistant", "content": "Hi! Tell me what you’re looking for - city, budget, bedrooms, and amenities."}
     ]
 
 for m in st.session_state.messages:
@@ -29,13 +28,16 @@ for m in st.session_state.messages:
         st.write(m["content"])
 
 user_input = st.chat_input("Your message")
+
 if user_input:
-    st.session_state.messages.append({"role":"user","content":user_input})
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
     data = call_llm(st.session_state.messages)
     filters = data["filters"]
     follow_up = data["follow_up"]
     f = Filters(**filters)
     res = filter_rank(df, f)
+
     with st.chat_message("assistant"):
         if follow_up:
             st.write(follow_up)
@@ -46,6 +48,10 @@ if user_input:
             else:
                 for _, row in res.head(10).iterrows():
                     st.image(row["image_url"], use_container_width=True)
-                    st.markdown(f"**{row['type'].title()} in {row['neighborhood']}, {row['city']} — {row['price']} {row['currency']}**")
+                    st.markdown(
+                        f"**{row['type'].title()} in {row['neighborhood']}, "
+                        f"{row['city']} — {row['price']} {row['currency']}**"
+                    )
                     st.caption(row["description"])
-    st.session_state.messages.append({"role":"assistant","content": follow_up or "Here are some matches!"})
+
+    st.session_state.messages.append({"role": "assistant", "content": follow_up or "Here are some matches!"})

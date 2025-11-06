@@ -11,6 +11,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 USE_OLLAMA = True
 try:
     import ollama  # local offline LLM
+
     ollama_client = ollama.Client(host=OLLAMA_HOST)
 except Exception:
     USE_OLLAMA = False
@@ -41,6 +42,7 @@ Rules:
 Return JSON only.
 """.strip()
 
+
 @dataclass
 class Filters:
     city: Optional[str] = None
@@ -62,20 +64,20 @@ class Filters:
         if f["property_type"]:
             f["property_type"] = f["property_type"].lower()
         if f["amenities"]:
-            f["amenities"] = [a for a in f["amenities"] if a in ["parking","garden","pool"]]
+            f["amenities"] = [a for a in f["amenities"] if a in ["parking", "garden", "pool"]]
         return f
 
 
-def call_llm(messages: List[Dict[str,str]]) -> Dict[str, Any]:
+def call_llm(messages: List[Dict[str, str]]) -> Dict[str, Any]:
     if USE_OLLAMA and ollama_client is not None:
         try:
             convo = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in messages[-6:])
             res = ollama_client.generate(
                 model=OLLAMA_MODEL,
                 prompt=f"{SYSTEM_PROMPT}\n\nCONVERSATION:\n{convo}\n\nReturn JSON now.",
-                options={"temperature":0.1}
+                options={"temperature": 0.1}
             )
-            raw = res.get("response","").strip()
+            raw = res.get("response", "").strip()
             if raw.startswith("```"):
                 raw = "\n".join(l for l in raw.splitlines() if not l.startswith("```") and not "json" in l)
             data = json.loads(raw)
@@ -99,6 +101,7 @@ def call_llm(messages: List[Dict[str,str]]) -> Dict[str, Any]:
         "follow_up": "Could you provide more details about your preferences?",
         "finalize": False
     }
+
 
 def filter_rank(df: pd.DataFrame, f: Filters) -> pd.DataFrame:
     d = f.normalized()
@@ -126,8 +129,8 @@ def filter_rank(df: pd.DataFrame, f: Filters) -> pd.DataFrame:
     if out.empty: return out
     out["score"] = 0
     if d["bedrooms_min"]:
-        out["score"] += (out["bedrooms"] - d["bedrooms_min"]).clip(lower=0)*0.2
+        out["score"] += (out["bedrooms"] - d["bedrooms_min"]).clip(lower=0) * 0.2
     target = d["price_max"] or d["price_min"]
     if target:
-        out["score"] -= abs(out["price"]-target)/1000
-    return out.sort_values(["score","price"], ascending=[False,True])
+        out["score"] -= abs(out["price"] - target) / 1000
+    return out.sort_values(["score", "price"], ascending=[False, True])
