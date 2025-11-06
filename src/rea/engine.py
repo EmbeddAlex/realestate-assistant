@@ -3,6 +3,10 @@ import json
 import pandas as pd
 from dataclasses import dataclass, asdict
 from typing import Optional, List, Dict, Any
+import logging
+
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 # ---- Offline LLM via Ollama ----
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b-instruct-q4_K_M")
@@ -69,6 +73,7 @@ class Filters:
 
 
 def call_llm(messages: List[Dict[str, str]]) -> Dict[str, Any]:
+    logger.info("Calling LLM...")
     if USE_OLLAMA and ollama_client is not None:
         try:
             convo = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in messages[-6:])
@@ -83,9 +88,11 @@ def call_llm(messages: List[Dict[str, str]]) -> Dict[str, Any]:
             raw = res.get("response", "").strip()
             data = json.loads(raw)
             if "filters" in data:
+                logger.info("LLM returned valid response.")
                 return data
         except Exception:
-            pass
+            logger.exception("LLM call failed.")
+    logger.warning("Returning default response due to LLM failure.")
     # Return empty structured default if LLM fails
     return {
         "filters": {
