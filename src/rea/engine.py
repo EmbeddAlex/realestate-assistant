@@ -1,5 +1,4 @@
 import os
-import re
 import json
 import pandas as pd
 from dataclasses import dataclass, asdict
@@ -66,48 +65,6 @@ class Filters:
             f["amenities"] = [a for a in f["amenities"] if a in ["parking","garden","pool"]]
         return f
 
-# --- Regex fallback parser ---
-CITY_WORDS = {"tbilisi":"Tbilisi","batumi":"Batumi","kutaisi":"Kutaisi","yerevan":"Yerevan","baku":"Baku"}
-TYPE_WORDS = {"apartment":"apartment","flat":"apartment","house":"house","condo":"condo"}
-AMENITY_WORDS = {"parking":"parking","garden":"garden","yard":"garden","pool":"pool"}
-
-def cheap_local_parse(user_text: str) -> Dict[str, Any]:
-    txt = user_text.lower()
-    price_min = price_max = None
-    m = re.search(r'(\d{3,5})\s*[-to]+\s*(\d{3,5})', txt)
-    if m:
-        a,b = int(m.group(1)), int(m.group(2))
-        price_min, price_max = min(a,b), max(a,b)
-    else:
-        m2 = re.search(r'\b(\d{3,5})\b', txt)
-        if m2:
-            price_max = int(m2.group(1))
-
-    bedrooms_min = None
-    m3 = re.search(r'(\d)\s*(bed|br|bedroom)s?', txt)
-    if m3:
-        bedrooms_min = int(m3.group(1))
-
-    city = next((c for w,c in CITY_WORDS.items() if w in txt), None)
-    ptype = next((t for w,t in TYPE_WORDS.items() if re.search(r'\b'+re.escape(w)+r's?\b',txt)), None)
-    amenities = [a for w,a in AMENITY_WORDS.items() if w in txt]
-    near_schools = True if "school" in txt else None
-    near_transit = True if any(k in txt for k in ["metro","bus","subway"]) else None
-
-    follow_up = ""
-    needed = []
-    if not city: needed.append("city")
-    if bedrooms_min is None: needed.append("bedrooms")
-    if price_min is None and price_max is None: needed.append("budget")
-    if needed:
-        follow_up = "Could you share your " + ", ".join(needed) + "?"
-    finalize = not needed
-
-    return {"filters":{
-        "city":city,"neighborhood":None,"price_min":price_min,"price_max":price_max,
-        "property_type":ptype,"bedrooms_min":bedrooms_min,"amenities":amenities,
-        "near_schools":near_schools,"near_transit":near_transit},
-        "follow_up":follow_up,"finalize":finalize}
 
 def call_llm(messages: List[Dict[str,str]]) -> Dict[str, Any]:
     if USE_OLLAMA and ollama_client is not None:
@@ -126,7 +83,22 @@ def call_llm(messages: List[Dict[str,str]]) -> Dict[str, Any]:
                 return data
         except Exception:
             pass
-    return cheap_local_parse(messages[-1]["content"])
+    # Return empty structured default if LLM fails
+    return {
+        "filters": {
+            "city": None,
+            "neighborhood": None,
+            "price_min": None,
+            "price_max": None,
+            "property_type": None,
+            "bedrooms_min": None,
+            "amenities": [],
+            "near_schools": None,
+            "near_transit": None
+        },
+        "follow_up": "Could you provide more details about your preferences?",
+        "finalize": False
+    }
 
 def filter_rank(df: pd.DataFrame, f: Filters) -> pd.DataFrame:
     d = f.normalized()

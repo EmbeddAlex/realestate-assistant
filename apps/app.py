@@ -12,7 +12,7 @@ from rea.engine import Filters, call_llm, filter_rank
 st.set_page_config(page_title="Real Estate Assistant (Offline)", page_icon="🏠")
 st.title("🏠 Real Estate Assistant - Offline LLM Demo")
 
-st.markdown("Use a **local Ollama LLM** (e.g., llama3.1). If not running, it falls back to a regex parser.")
+st.markdown("Use a **local Ollama LLM** (e.g., llama3.1)")
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "properties.csv"
