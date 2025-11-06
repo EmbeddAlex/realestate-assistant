@@ -6,11 +6,8 @@ Runs **completely offline** using [Ollama](https://ollama.com) and a local model
 
 
 ```bash
-cd /mnt/data/realestate-assistant-demo
-
 # Install Ollama: https://ollama.com/download
 ollama pull llama3.1      # or: ollama pull mistral
-export OLLAMA_MODEL=llama3.1   # optional
 
 pip install -r requirements.txt
 
