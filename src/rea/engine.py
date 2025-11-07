@@ -31,6 +31,7 @@ Keys:
     price_min: int|Null,
     price_max: int|Null,
     property_type: "apartment"|"house"|"condo"|Null,
+    transaction_type: "rent"|"buy"|Null,
     bedrooms_min: int|Null,
     amenities: list[str]  (subset of ["parking","garden","pool"]),
     near_schools: true|false|Null,
@@ -43,6 +44,8 @@ Rules:
 - If user gives "800-1200", set price_min=800, price_max=1200.
 - If user gives "up to 1200", set price_max=1200.
 - If user says "near schools/transit", set corresponding boolean true.
+- If user mentions rent/lease/monthly, set transaction_type="rent".
+- If user mentions buy/purchase/for sale/mortgage, set transaction_type="buy".
 Return JSON only.
 """.strip()
 
@@ -54,6 +57,7 @@ class Filters:
     price_min: Optional[int] = None
     price_max: Optional[int] = None
     property_type: Optional[str] = None
+    transaction_type: Optional[str] = None
     bedrooms_min: Optional[int] = None
     amenities: Optional[List[str]] = None
     near_schools: Optional[bool] = None
@@ -67,6 +71,10 @@ class Filters:
             f["neighborhood"] = f["neighborhood"].strip()
         if f["property_type"]:
             f["property_type"] = f["property_type"].lower()
+        if f.get("transaction_type"):
+            f["transaction_type"] = f["transaction_type"].lower()
+            if f["transaction_type"] not in ("rent", "buy"):
+                f["transaction_type"] = None
         if f["amenities"]:
             f["amenities"] = [a for a in f["amenities"] if a in ["parking", "garden", "pool"]]
         return f
@@ -101,6 +109,7 @@ def call_llm(messages: List[Dict[str, str]]) -> Dict[str, Any]:
             "price_min": None,
             "price_max": None,
             "property_type": None,
+            "transaction_type": None,
             "bedrooms_min": None,
             "amenities": [],
             "near_schools": None,
@@ -120,6 +129,8 @@ def filter_rank(df: pd.DataFrame, f: Filters) -> pd.DataFrame:
         out = out[out["neighborhood"].str.lower() == d["neighborhood"].lower()]
     if d["property_type"]:
         out = out[out["type"] == d["property_type"]]
+    if d.get("transaction_type"):
+        out = out[out["listing_type"] == d["transaction_type"]]
     if d["bedrooms_min"]:
         out = out[out["bedrooms"] >= int(d["bedrooms_min"])]
     if d["price_min"]:
